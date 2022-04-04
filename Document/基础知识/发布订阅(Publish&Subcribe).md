@@ -1,0 +1,1 @@
+# [发布订阅](https://docs.microsoft.com/zh-cn/dotnet/architecture/dapr-for-net-developers/publish-subscribe)
