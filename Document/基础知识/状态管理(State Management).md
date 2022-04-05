@@ -15,8 +15,34 @@
 # 一致性
 # 事务
 # 并发
-# dapr SDK 的使用
-# asp.net core 的集成
+# Dapr.NET SDK的使用
+```C#
+  //获取
+  var weatherForecast = await daprClient.GetStateAsync<WeatherForecast>("statestore", "AMS");
+  //保存
+  daprClient.SaveStateAsync("statestore", "AMS", weatherForecast);
+  //更新
+  var (weatherForecast, etag) = await daprClient.GetStateAndETagAsync<WeatherForecast>("statestore", city);
+  var result = await daprClient.TrySaveStateAsync("statestore", city, weatherForecast, etag);
+```
+# ASP.NET core 的集成
+```C#
+  //依赖注入
+  var builder = WebApplication.CreateBuilder(args);
+  builder.Services.AddControllers().AddDapr();
+
+  //在接口中通过FromState 注入键值对
+  [HttpGet("{city}")]
+  public ActionResult<WeatherForecast> Get([FromState("statestore", "city")] StateEntry<WeatherForecast> forecast)
+  {
+      if (forecast.Value == null)
+      {
+        return NotFound();
+      }
+
+      return forecast.Value;
+  }
+```
 # 支持的状态存储组件
 # 配置
 ```yaml
