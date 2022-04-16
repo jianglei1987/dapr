@@ -2,19 +2,52 @@
 # 解决的问题
     + 需要消息队列的场景
     + 将消息队列和业务分离
+
 # 工作原理
-+ 发布:
+## 发布:
 ```
     http://localhost:<dapr-port>/v1.0/publish/<pub-sub-name>/<topic>
 ```
 + dapr-port：Dapr 正在侦听的端口号。
 + pub-sub-name： Dapr 发布/订阅组件的名称。
 + method-name：消息要发布到的主题的名称。
-# 订阅：
+## 订阅：
 ```
 http://localhost:<appPort>/dapr/subscribe
 ```
 + appPort：Dapr 正在侦听的端口号。
+
+## 消息发布
++ Dapr将不同的消息框架进行抽象和封装，提供了一个与平台无关的API框架。
++ 消息格式：[CloudEvents 1.0 规范](https://github.com/cloudevents/spec/tree/v1.0)
+```json
+{
+    "specversion" : "1.0",
+    "type" : "xml.message",
+    "source" : "https://example.com/message",
+    "subject" : "Test XML Message",
+    "id" : "id-1234-5678-9101",
+    "time" : "2020-09-23T06:23:21Z",
+    "datacontenttype" : "text/xml",
+    "data" : "<note><to>User1</to><from>user2</from><message>hi</message></note>"
+}
+```
+
+## 消息订阅
+### 声明方式
+```yaml
+apiVersion: dapr.io/v1alpha1
+kind: Subscription
+metadata:
+  name: myevent-subscription
+spec:
+  topic: test_topic  //主题
+  route: /TestPubSub //路由
+  pubsubname: pubsub //名称
+scopes:
+- frontend　　　　　　 //为该应用启用订阅
+```
+### 编程方式
 
 # Dapr.NET SDK的使用
 
