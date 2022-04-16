@@ -1,4 +1,6 @@
+using Dapr;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 
 namespace ServiceSubcribe.Controllers;
 
@@ -19,14 +21,26 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    public async Task<ActionResult> Get()
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateTime.Now.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
+        _logger.LogInformation($"get daprData{_daprData.Name}");
+        return Ok(_daprData?.Name);
+    }
+
+    DaprData _daprData;
+
+    [Topic("pubsub", "daprData")]
+    [HttpPost("/daprDatas")]
+    public async Task<ActionResult> CreateData(DaprData daprData)
+    {
+        _daprData=daprData;
+        _logger.LogInformation($"post daprData{_daprData.Name}");
+        return Ok(_daprData.Name);
+    }
+
+
+    public class DaprData
+    {
+        public string Name { set; get; }
     }
 }

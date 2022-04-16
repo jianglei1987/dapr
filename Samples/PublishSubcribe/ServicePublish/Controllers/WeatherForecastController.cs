@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Dapr.Client;
 
 namespace ServicePublish.Controllers;
 
@@ -6,6 +7,9 @@ namespace ServicePublish.Controllers;
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
+
+    private readonly DaprClient _daprClient;
+
     private static readonly string[] Summaries = new[]
     {
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -13,20 +17,24 @@ public class WeatherForecastController : ControllerBase
 
     private readonly ILogger<WeatherForecastController> _logger;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, DaprClient daprClient)
     {
         _logger = logger;
+        _daprClient = daprClient;
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    public async Task<string> Get()
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateTime.Now.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
+        DaprData daprData = new DaprData() { Name = "*****#######********" };
+        //pubsub提供消息代理实现的 Dapr 组件名称
+        //daprData提供要向其发送消息的主题的名称。
+        await _daprClient.PublishEventAsync<DaprData>("pubsub", "daprData", daprData);
+        return $"{daprData.Name}已发布";
     }
+}
+
+public class DaprData
+{
+    public string Name { set; get; }
 }
